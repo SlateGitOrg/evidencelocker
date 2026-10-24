@@ -263,3 +263,40 @@ func TestTimestampsOrderAsStrings(t *testing.T) {
 		t.Fatalf("%s !< %s", a, b)
 	}
 }
+
+// FuzzCustodyVerify: arbitrary edits of a valid log must never panic and
+// must never verify unless the bytes are unchanged.
+func FuzzCustodyVerify(f *testing.F) {
+	dir := f.TempDir()
+	p := filepath.Join(dir, "log.jsonl")
+	if _, err := Create(p, testBundle, Signer{"collector", collectorKey}, t0, ""); err != nil {
+		f.Fatal(err)
+	}
+	if _, err := Append(p, AppendRequest{Action: ActionNote, Signer: Signer{"collector", collectorKey}, Now: t0}); err != nil {
+		f.Fatal(err)
+	}
+	orig, _ := os.ReadFile(p)
+	f.Add(uint16(10), byte(1))
+	f.Add(uint16(500), byte(0x20))
+	f.Fuzz(func(t *testing.T, off uint16, mask byte) {
+		mut := append([]byte(nil), orig...)
+		mut[int(off)%len(mut)] ^= mask
+		rep := Verify(bytes.NewReader(mut), VerifyOptions{})
+		if rep.OK != bytes.Equal(mut, orig) {
+			t.Fatalf("OK=%v for mask %#x at %d", rep.OK, mask, off)
+		}
+	})
+}
+
+func TestFindingString(t *testing.T) {
+	cases := map[string]Finding{
+		"line 3 (seq 2) X: d": {Line: 3, Seq: 2, Code: "X", Detail: "d"},
+		"line 3 X: d":         {Line: 3, Seq: -1, Code: "X", Detail: "d"},
+		"log X: d":            {Line: 0, Seq: -1, Code: "X", Detail: "d"},
+	}
+	for want, f := range cases {
+		if f.String() != want {
+			t.Errorf("%q != %q", f.String(), want)
+		}
+	}
+}

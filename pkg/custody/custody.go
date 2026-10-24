@@ -262,7 +262,14 @@ type Finding struct {
 }
 
 func (f Finding) String() string {
-	return fmt.Sprintf("line %d (seq %d) %s: %s", f.Line, f.Seq, f.Code, f.Detail)
+	where := "log"
+	switch {
+	case f.Line > 0 && f.Seq >= 0:
+		where = fmt.Sprintf("line %d (seq %d)", f.Line, f.Seq)
+	case f.Line > 0:
+		where = fmt.Sprintf("line %d", f.Line)
+	}
+	return fmt.Sprintf("%s %s: %s", where, f.Code, f.Detail)
 }
 
 // Finding codes.

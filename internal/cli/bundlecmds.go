@@ -142,8 +142,12 @@ func (a *App) printCustody(path string, rep *custody.Report) {
 	if !rep.OK {
 		status = fmt.Sprintf("FAILED: %d finding(s)", len(rep.Findings))
 	}
-	fmt.Fprintf(w, "custody  %s: %d entries, current custodian %s, head %s: %s\n",
-		path, len(rep.Entries), rep.Custodian, rep.Head, status)
+	noun := "entries"
+	if len(rep.Entries) == 1 {
+		noun = "entry"
+	}
+	fmt.Fprintf(w, "custody  %s: %d %s, current custodian %s, head %s: %s\n",
+		path, len(rep.Entries), noun, rep.Custodian, rep.Head, status)
 	for _, f := range rep.Findings {
 		fmt.Fprintf(w, "  - %s\n", f)
 	}

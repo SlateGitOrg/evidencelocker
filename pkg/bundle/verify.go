@@ -271,11 +271,11 @@ func scan(rc io.Reader) ([]*tarEntry, int64, *Finding) {
 
 func containerFinding(err error, what string, sp Span) *Finding {
 	var ce *containerError
-	detail := fmt.Sprintf("%s: %v", what, err)
 	if errors.As(err, &ce) {
-		detail = fmt.Sprintf("compressed stream corrupt while %s: %v", what, ce.err)
+		// The fault is in the compressed domain; tar offsets would mislead.
+		return &Finding{Code: CodeContainer, Detail: fmt.Sprintf("compressed stream corrupt (zstd: %v); decoding stopped while %s", ce.err, what)}
 	}
-	return &Finding{Code: CodeContainer, Detail: detail, Spans: []Span{sp}}
+	return &Finding{Code: CodeContainer, Detail: fmt.Sprintf("%s: %v", what, err), Spans: []Span{sp}}
 }
 
 // verify runs all checks. fileDigest, when non-nil, is called after the

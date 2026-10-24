@@ -202,14 +202,11 @@ func FuzzVerifyInclusion(f *testing.F) {
 		// Arbitrary noise applied to the proof must never verify (and never panic).
 		if len(noise) > 0 && len(p) > 0 {
 			k := int(noise[0]) % len(p)
-			changed := false
+			orig := p[k]
 			for j, b := range noise[1:] {
-				if b != 0 {
-					p[k][j%32] ^= b
-					changed = true
-				}
+				p[k][j%32] ^= b
 			}
-			if changed && p[k] != tr.Root() && VerifyInclusion(ls[i], i, n, p, tr.Root()) == nil {
+			if p[k] != orig && VerifyInclusion(ls[i], i, n, p, tr.Root()) == nil {
 				t.Fatal("mutated proof verified")
 			}
 		}

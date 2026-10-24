@@ -7,7 +7,7 @@ COVER_MIN ?= 80
 PKGS := ./...
 CORE := ./pkg/... ./internal/...
 
-.PHONY: all build test race cover fmt fmt-check vet lint check demo bench fuzz fixtures clean help
+.PHONY: all build test race cover fmt fmt-check vet lint check demo eval bench fuzz fixtures clean help
 
 all: check
 
@@ -48,6 +48,9 @@ check: fmt-check vet lint race cover
 
 demo:
 	./scripts/demo.sh
+
+eval:
+	./scripts/eval.sh
 
 bench:
 	./scripts/bench.sh
