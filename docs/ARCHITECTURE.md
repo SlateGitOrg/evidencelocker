@@ -47,6 +47,12 @@ Verification, diffing and proofs only read: `bundle.VerifyFile`,
 * `OpenRegular` uses `Lstat`, then opens the file, then checks `os.SameFile`
   against the opened handle. A file swapped between inspection and reading
   is reported and skipped.
+* `ReadFile` and `OpenRegular` never open a special file. The type is checked
+  with `Lstat` before the open, the open uses `O_NONBLOCK`, and the handle is
+  checked again with `Stat`. A named pipe, socket or device at a collected
+  path (any user can `mkfifo ~/.bashrc`) is therefore reported as
+  `ErrNotRegular` and named in the warning; it cannot block the collector,
+  even if it is swapped in between the check and the open.
 * Cost: `Resolve` performs one `Lstat` per path component plus one per
   symlink hop, so it is O(components + hops).
 
@@ -71,6 +77,13 @@ type Record interface { Key() string; Digest() string }
   the stack logged. `ErrNotApplicable` becomes `skipped`. A timeout from the
   context becomes `error`. `Output.Partial` becomes `partial`. One broken
   collector never costs you the others.
+* **The timeout is a hard bound.** The runner waits on the collector's result
+  or its context, whichever comes first. After the deadline (or a cancelled
+  run) it allows `AbandonGrace` (default 2s) for the collector to return its
+  partial output. A collector still blocked after that, in a call that ignores
+  `ctx`, is abandoned: its status is `error`, it gets a warning, its partial
+  output is discarded, and its goroutine is left behind. It no longer holds a
+  parallelism slot.
 * **Records are stored deterministically.** They are sorted by (key, digest,
   data) before encoding, so the same host yields byte-identical record files.
 

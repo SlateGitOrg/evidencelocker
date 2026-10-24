@@ -97,6 +97,9 @@ type Collector interface {
    `out.Warnf(...)` and `out.Partial = true`. Return `ErrNotApplicable` when
    the source is absent. Return an error only when the collector's whole
    source is unreadable. Honour `ctx`, which carries the per-collector timeout.
+   A collector that ignores `ctx` past its deadline is abandoned and its
+   output is discarded. Read through `env.Root`, which refuses FIFOs and
+   devices rather than blocking on them.
 5. **Optional:** implement `collector.Configurable` (`Configure(json.RawMessage)
    error`, decoding with `collector.DecodeOptions` to reject unknown fields).
 6. **Optional:** add a `baseline.Rule` to rank your collector's changes.
