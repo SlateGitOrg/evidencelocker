@@ -168,7 +168,7 @@ func ParseStatus(s string) (*Process, error) {
 			}
 			n, err := strconv.Atoi(f[0])
 			if err != nil {
-				return nil, fmt.Errorf("Uid %q: %w", v, err)
+				return nil, fmt.Errorf("uid %q: %w", v, err)
 			}
 			p.UID = n
 		}

@@ -183,8 +183,8 @@ func SealFile(path string, items []Item, opts SealOptions) (*Sealed, error) {
 	ok := false
 	defer func() {
 		if !ok {
-			tmp.Close()
-			os.Remove(tmp.Name())
+			_ = tmp.Close()
+			_ = os.Remove(tmp.Name())
 		}
 	}()
 	s, err := Seal(tmp, items, opts)
@@ -197,14 +197,14 @@ func SealFile(path string, items []Item, opts SealOptions) (*Sealed, error) {
 	if err := tmp.Close(); err != nil {
 		return nil, fmt.Errorf("seal: %w", err)
 	}
-	if err := os.Chmod(tmp.Name(), 0o444); err != nil {
+	if err := os.Chmod(tmp.Name(), 0o400); err != nil {
 		return nil, fmt.Errorf("seal: %w", err)
 	}
 	// os.Link fails if path appeared meanwhile, unlike Rename.
 	if err := os.Link(tmp.Name(), path); err != nil {
 		return nil, fmt.Errorf("seal: %w", err)
 	}
-	os.Remove(tmp.Name())
+	_ = os.Remove(tmp.Name())
 	ok = true
 	return s, nil
 }

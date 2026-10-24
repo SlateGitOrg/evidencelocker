@@ -135,14 +135,6 @@ type memb struct {
 	data []byte
 }
 
-func codesOf(rep *Report) []Code {
-	var out []Code
-	for _, f := range rep.Findings {
-		out = append(out, f.Code)
-	}
-	return out
-}
-
 func hasCode(rep *Report, c Code, path string) bool {
 	for _, f := range rep.Findings {
 		if f.Code == c && (path == "" || f.Path == path) {
@@ -274,7 +266,7 @@ func TestSealFileAtomicNoOverwrite(t *testing.T) {
 		t.Fatalf("temp files left behind: %v", ents)
 	}
 	fi, _ := os.Stat(p)
-	if fi.Mode().Perm() != 0o444 {
+	if fi.Mode().Perm() != 0o400 {
 		t.Fatalf("mode %v, want read-only", fi.Mode())
 	}
 }

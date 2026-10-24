@@ -115,7 +115,7 @@ func (a *App) cmdCollect(ctx context.Context, args []string) int {
 	if err != nil {
 		return a.fail(err)
 	}
-	defer r.Close()
+	defer func() { _ = r.Close() }()
 
 	env := &collector.Env{Root: r, Clock: a.Clock, Logger: a.Logger}
 	started := a.Clock.Now()

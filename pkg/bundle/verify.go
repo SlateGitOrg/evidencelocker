@@ -23,16 +23,16 @@ type Code string
 
 // Finding codes. Every code means the bundle is not what was sealed.
 const (
-	CodeContainer       Code = "CONTAINER_CORRUPT"       // zstd or tar framing broken
-	CodeContainerNoncan Code = "CONTAINER_NONCANONICAL"  // decodes fine, but compressed bytes were altered
-	CodeLayout          Code = "LAYOUT_NONCANONICAL"     // tar header/padding/trailer bytes differ from canonical
-	CodeMetaMissing     Code = "METADATA_MISSING"        // manifest/head/sig absent or misplaced
-	CodeSignature       Code = "SIGNATURE_INVALID"       // head.sig malformed or does not verify
-	CodeUntrustedKey    Code = "UNTRUSTED_KEY"           // valid signature by a key not pinned by the caller
-	CodeHead            Code = "HEAD_INVALID"            // head.json malformed or inconsistent
+	CodeContainer       Code = "CONTAINER_CORRUPT"        // zstd or tar framing broken
+	CodeContainerNoncan Code = "CONTAINER_NONCANONICAL"   // decodes fine, but compressed bytes were altered
+	CodeLayout          Code = "LAYOUT_NONCANONICAL"      // tar header/padding/trailer bytes differ from canonical
+	CodeMetaMissing     Code = "METADATA_MISSING"         // manifest/head/sig absent or misplaced
+	CodeSignature       Code = "SIGNATURE_INVALID"        // head.sig malformed or does not verify
+	CodeUntrustedKey    Code = "UNTRUSTED_KEY"            // valid signature by a key not pinned by the caller
+	CodeHead            Code = "HEAD_INVALID"             // head.json malformed or inconsistent
 	CodeManifestDigest  Code = "MANIFEST_DIGEST_MISMATCH" // manifest.json bytes differ from signed digest
-	CodeManifest        Code = "MANIFEST_INVALID"        // manifest.json malformed or inconsistent
-	CodeMerkle          Code = "MERKLE_ROOT_MISMATCH"    // entries do not hash to the signed root
+	CodeManifest        Code = "MANIFEST_INVALID"         // manifest.json malformed or inconsistent
+	CodeMerkle          Code = "MERKLE_ROOT_MISMATCH"     // entries do not hash to the signed root
 	CodeEntryMissing    Code = "ENTRY_MISSING"
 	CodeEntryUnexpected Code = "ENTRY_UNEXPECTED"
 	CodeEntryDuplicate  Code = "ENTRY_DUPLICATE"
@@ -136,7 +136,7 @@ func fileSHA256(path string) (string, int64, error) {
 	if err != nil {
 		return "", 0, err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	h := sha256.New()
 	n, err := io.Copy(h, f)
 	if err != nil {
@@ -174,7 +174,7 @@ type decodeStream struct {
 func newDecodeStream(f *os.File) (*decodeStream, error) {
 	d, err := newDecoder(f)
 	if err != nil {
-		f.Close()
+		_ = f.Close()
 		return nil, err
 	}
 	return &decodeStream{f: f, dec: d}, nil
@@ -252,7 +252,7 @@ func scan(rc io.Reader) ([]*tarEntry, int64, *Finding) {
 			buf = &bytes.Buffer{}
 			dst = io.MultiWriter(hasher, buf)
 		}
-		if _, err := io.Copy(dst, tr); err != nil {
+		if _, err := io.Copy(dst, tr); err != nil { //nolint:gosec // G110: streamed into a hash; only size-capped metadata is buffered
 			return ents, cr.n, containerFinding(err, "reading "+h.Name, Span{e.data.Start, max(cr.n, e.data.Start+1)})
 		}
 		copy(e.sum[:], hasher.Sum(nil))
@@ -288,7 +288,7 @@ func verify(open opener, opts VerifyOptions, checkContainer bool, fileDigest fun
 		return rep
 	}
 	ents, tarSize, cf := scan(rc)
-	rc.Close()
+	_ = rc.Close()
 	rep.TarSize = tarSize
 	if fileDigest != nil {
 		rep.FileSHA256 = fileDigest()
@@ -522,13 +522,13 @@ func checkLayout(rep *Report, open opener, ents []*tarEntry, recompress bool) bo
 		rep.add(Finding{Code: CodeContainer, Detail: "reopen for layout check: " + err.Error()})
 		return false
 	}
-	defer ra.Close()
+	defer func() { _ = ra.Close() }()
 	rb, err := open()
 	if err != nil {
 		rep.add(Finding{Code: CodeContainer, Detail: "reopen for layout check: " + err.Error()})
 		return false
 	}
-	defer rb.Close()
+	defer func() { _ = rb.Close() }()
 
 	cmp := &comparer{ref: rb, diff: -1, buf: make([]byte, 32<<10)}
 	var sink io.Writer = cmp
@@ -561,7 +561,7 @@ func checkLayout(rep *Report, open opener, ents []*tarEntry, recompress bool) bo
 			return false
 		}
 		regions = append(regions, region{Span{start, cmp.off}, "tar header", h.Name})
-		if _, err := io.Copy(tw, tr); err != nil {
+		if _, err := io.Copy(tw, tr); err != nil { //nolint:gosec // G110: streamed through the comparator, never buffered
 			rep.add(Finding{Code: CodeContainer, Detail: "archive changed between verification passes"})
 			return false
 		}

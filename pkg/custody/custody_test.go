@@ -259,7 +259,7 @@ func TestInvalidSealName(t *testing.T) {
 func TestTimestampsOrderAsStrings(t *testing.T) {
 	a := formatTime(t0.Add(500 * time.Millisecond))
 	b := formatTime(t0.Add(time.Second))
-	if !(a < b) || len(a) != len(b) {
+	if a >= b || len(a) != len(b) {
 		t.Fatalf("%s !< %s", a, b)
 	}
 }

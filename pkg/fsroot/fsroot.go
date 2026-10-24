@@ -198,7 +198,7 @@ func (r *Root) ReadFile(p string, max int64) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	fi, err := f.Stat()
 	if err != nil {
 		return nil, err
@@ -244,11 +244,11 @@ func (r *Root) OpenRegular(p string) (*os.File, fs.FileInfo, error) {
 	}
 	after, err := f.Stat()
 	if err != nil {
-		f.Close()
+		_ = f.Close()
 		return nil, nil, err
 	}
 	if !os.SameFile(before, after) {
-		f.Close()
+		_ = f.Close()
 		return nil, nil, fmt.Errorf("open %s: file changed during open", p)
 	}
 	return f, after, nil

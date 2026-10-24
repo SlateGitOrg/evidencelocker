@@ -14,7 +14,7 @@ import (
 func main() {
 	out := flag.String("out", "testdata/hosts", "output directory (must not exist)")
 	flag.Parse()
-	if err := os.Mkdir(*out, 0o755); err != nil {
+	if err := os.Mkdir(*out, 0o750); err != nil {
 		fmt.Fprintln(os.Stderr, "genfixtures:", err)
 		os.Exit(1)
 	}

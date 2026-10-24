@@ -58,8 +58,8 @@ func (e Entry) Key() string {
 	return k
 }
 
-// Digest: file-level entries change with their file; line-level entries
-// change only when the line's own meaning changes.
+// Digest changes with the whole file for file-level entries, and only with
+// the line's own meaning for line-level entries.
 func (e Entry) Digest() string {
 	v := struct {
 		Command, User, Trigger, File string

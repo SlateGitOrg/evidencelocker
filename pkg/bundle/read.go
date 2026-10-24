@@ -79,7 +79,7 @@ func (b *Bundle) ReadEntries(want func(path string) bool) (map[string][]byte, er
 	if err != nil {
 		return nil, err
 	}
-	defer ds.Close()
+	defer func() { _ = ds.Close() }()
 	tr := tar.NewReader(ds)
 	out := map[string][]byte{}
 	for {

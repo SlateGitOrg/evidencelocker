@@ -163,7 +163,7 @@ func Create(path string, b Bundle, s Signer, now time.Time, note string) (*Entry
 		return nil, fmt.Errorf("custody: %w", err)
 	}
 	if err := writeLine(f, e); err != nil {
-		f.Close()
+		_ = f.Close()
 		return nil, err
 	}
 	return e, f.Close()
@@ -198,7 +198,7 @@ func Append(path string, req AppendRequest) (*Entry, error) {
 	if err != nil {
 		return nil, fmt.Errorf("custody: %w", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	if err := syscall.Flock(int(f.Fd()), syscall.LOCK_EX); err != nil {
 		return nil, fmt.Errorf("custody: lock: %w", err)
 	}
@@ -439,7 +439,7 @@ func VerifyFile(path string, opts VerifyOptions) (*Report, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	return Verify(f, opts), nil
 }
 

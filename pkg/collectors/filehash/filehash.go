@@ -299,7 +299,7 @@ func (c *Collector) hashOne(env *collector.Env, it *item, buf []byte) {
 		r.Skipped = "unreadable"
 		return
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	h := sha256.New()
 	var dst io.Writer = h
 	var capBuf *captureBuffer

@@ -130,7 +130,7 @@ func WritePair(base string, pub ed25519.PublicKey, priv ed25519.PrivateKey) erro
 		return fmt.Errorf("write private key: %w", err)
 	}
 	if _, err := f.Write(kb); err != nil {
-		f.Close()
+		_ = f.Close()
 		return err
 	}
 	if err := f.Close(); err != nil {
