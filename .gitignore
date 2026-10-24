@@ -1,0 +1,7 @@
+/bin/
+/.demo/
+/coverage.out
+/coverage.txt
+*.test
+*.tmp
+/dist/
