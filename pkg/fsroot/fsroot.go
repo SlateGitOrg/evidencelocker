@@ -22,6 +22,7 @@ import (
 	"path"
 	"sort"
 	"strings"
+	"syscall"
 )
 
 // maxLinkHops bounds symlink resolution, mirroring the kernel's ELOOP limit.
@@ -188,24 +189,20 @@ func (r *Root) ReadDir(p string) ([]fs.DirEntry, error) {
 }
 
 // ReadFile reads the regular file at p (following symlinks) up to max bytes.
-// A max of zero or less means no limit.
+// A max of zero or less means no limit. Anything that is not a regular file
+// (directory, named pipe, socket, device) is rejected with ErrNotRegular
+// before it is opened, so a FIFO planted at a collected path cannot block the
+// caller.
 func (r *Root) ReadFile(p string, max int64) ([]byte, error) {
 	rp, err := r.Resolve(p)
 	if err != nil {
 		return nil, err
 	}
-	f, err := r.r.Open(rel(rp))
+	f, _, err := r.openRegular("read", p, rel(rp), false)
 	if err != nil {
 		return nil, err
 	}
 	defer func() { _ = f.Close() }()
-	fi, err := f.Stat()
-	if err != nil {
-		return nil, err
-	}
-	if !fi.Mode().IsRegular() {
-		return nil, fmt.Errorf("read %s: %w", p, ErrNotRegular)
-	}
 	var rd io.Reader = f
 	if max > 0 {
 		rd = io.LimitReader(f, max+1)
@@ -230,15 +227,29 @@ func (r *Root) OpenRegular(p string) (*os.File, fs.FileInfo, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	name := rel(path.Join(rd, base))
+	return r.openRegular("open", p, rel(path.Join(rd, base)), true)
+}
+
+// openRegular opens the root-relative name for reading only if it is a
+// regular file. It never blocks on a special file: the file type is checked
+// with Lstat before the open, and the open itself uses O_NONBLOCK so that a
+// file swapped for a named pipe between the check and the open still returns
+// at once (the post-open Stat then rejects it). O_NONBLOCK has no effect on
+// reads from regular files. With same set, the handle must also be the very
+// file that was inspected; ReadFile leaves it unset so that an atomic
+// regular-to-regular replacement (log rotation, editors) still reads.
+func (r *Root) openRegular(op, p, name string, same bool) (*os.File, fs.FileInfo, error) {
 	before, err := r.r.Lstat(name)
 	if err != nil {
 		return nil, nil, err
 	}
 	if !before.Mode().IsRegular() {
-		return nil, nil, fmt.Errorf("open %s: %w", p, ErrNotRegular)
+		return nil, nil, fmt.Errorf("%s %s: %w (%s)", op, p, ErrNotRegular, kind(before.Mode()))
 	}
-	f, err := r.r.Open(name)
+	if testHookAfterLstat != nil {
+		testHookAfterLstat(name)
+	}
+	f, err := r.r.OpenFile(name, os.O_RDONLY|syscall.O_NONBLOCK, 0)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -247,11 +258,39 @@ func (r *Root) OpenRegular(p string) (*os.File, fs.FileInfo, error) {
 		_ = f.Close()
 		return nil, nil, err
 	}
-	if !os.SameFile(before, after) {
+	if !after.Mode().IsRegular() {
 		_ = f.Close()
-		return nil, nil, fmt.Errorf("open %s: file changed during open", p)
+		return nil, nil, fmt.Errorf("%s %s: %w (%s)", op, p, ErrNotRegular, kind(after.Mode()))
+	}
+	if same && !os.SameFile(before, after) {
+		_ = f.Close()
+		return nil, nil, fmt.Errorf("%s %s: file changed during open", op, p)
 	}
 	return f, after, nil
+}
+
+// testHookAfterLstat, when set by tests, runs between the type check and the
+// open so a test can swap the file and exercise the post-open check.
+var testHookAfterLstat func(name string)
+
+// kind names a non-regular file type for warnings an analyst will read.
+func kind(m fs.FileMode) string {
+	switch {
+	case m.IsDir():
+		return "directory"
+	case m&fs.ModeSymlink != 0:
+		return "symlink"
+	case m&fs.ModeNamedPipe != 0:
+		return "named pipe"
+	case m&fs.ModeSocket != 0:
+		return "socket"
+	case m&fs.ModeCharDevice != 0:
+		return "character device"
+	case m&fs.ModeDevice != 0:
+		return "block device"
+	default:
+		return "irregular file"
+	}
 }
 
 // Glob matches a host path pattern whose components may contain shell

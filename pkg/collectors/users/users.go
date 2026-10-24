@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/archit2501/evidencelocker/pkg/collector"
+	"github.com/archit2501/evidencelocker/pkg/fsroot"
 )
 
 // RecordSize is sizeof(struct utmp) for glibc on 64-bit Linux
@@ -107,6 +108,9 @@ func (c *Collector) Collect(_ context.Context, env *collector.Env) (*collector.O
 		if err == nil {
 			data, src = b, p
 			break
+		}
+		if errors.Is(err, fsroot.ErrNotRegular) {
+			return out, err // already names the path and file type
 		}
 		if !errors.Is(err, fs.ErrNotExist) {
 			return out, fmt.Errorf("read %s: %w", p, err)
