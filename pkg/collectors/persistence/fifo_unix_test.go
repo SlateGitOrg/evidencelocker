@@ -66,6 +66,11 @@ func TestFIFOsAtPersistencePathsDoNotBlock(t *testing.T) {
 			t.Errorf("no warning for %s in:\n%s", p, warns)
 		}
 	}
+	for _, w := range r.out.Warnings {
+		if strings.Count(w, "read ") != 1 {
+			t.Errorf("warning repeats its prefix: %q", w)
+		}
+	}
 	if strings.Count(warns, "named pipe") < 3 {
 		t.Errorf("warnings should name the file type:\n%s", warns)
 	}

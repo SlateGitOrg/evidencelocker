@@ -140,7 +140,13 @@ func (s *scan) read(p string) (file, bool) {
 	}
 	b, err := s.env.Root.ReadFile(p, s.max)
 	if err != nil && !errors.Is(err, fsroot.ErrTooLarge) {
-		if !errors.Is(err, fs.ErrNotExist) {
+		switch {
+		case errors.Is(err, fsroot.ErrNotRegular):
+			// A FIFO, socket or device where a config file belongs: the
+			// error already names the path and the file type.
+			s.out.Warnf("%v", err)
+			s.out.Partial = true
+		case !errors.Is(err, fs.ErrNotExist):
 			s.out.Warnf("read %s: %v", p, err)
 			s.out.Partial = true
 		}
