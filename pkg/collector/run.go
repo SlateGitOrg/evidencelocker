@@ -38,17 +38,35 @@ type Result struct {
 type RunOptions struct {
 	// Parallelism bounds concurrently running collectors (default 1).
 	Parallelism int
-	// Timeout bounds each collector (0 = none). Collectors must honour ctx.
+	// Timeout bounds each collector (0 = none). Collectors should honour ctx;
+	// one that does not is abandoned AbandonGrace after its deadline.
 	Timeout time.Duration
+	// AbandonGrace is how long the runner waits, once a collector's context
+	// is done, for the collector to return its partial output on its own
+	// before abandoning it (default DefaultAbandonGrace).
+	AbandonGrace time.Duration
 }
+
+// DefaultAbandonGrace is the default RunOptions.AbandonGrace.
+const DefaultAbandonGrace = 2 * time.Second
 
 // Run executes collectors and returns their results in name order. A
 // collector that panics, errors or times out yields StatusError without
 // affecting the others: a triage run must salvage everything it can.
+//
+// The timeout is a hard bound. A collector stuck in a call that ignores its
+// context (for example a blocking read on a hostile host) is abandoned once
+// the grace period after its deadline has passed: its result is StatusError,
+// its partial output is discarded (the goroutine may still be writing to it),
+// and its goroutine is left to finish or die with the process. An abandoned
+// collector no longer counts against Parallelism.
 func Run(ctx context.Context, env *Env, cs []Collector, opts RunOptions) []Result {
 	par := opts.Parallelism
 	if par < 1 {
 		par = 1
+	}
+	if opts.AbandonGrace <= 0 {
+		opts.AbandonGrace = DefaultAbandonGrace
 	}
 	results := make([]Result, len(cs))
 	sem := make(chan struct{}, par)
@@ -59,7 +77,7 @@ func Run(ctx context.Context, env *Env, cs []Collector, opts RunOptions) []Resul
 			defer wg.Done()
 			sem <- struct{}{}
 			defer func() { <-sem }()
-			results[i] = runOne(ctx, env, c, opts.Timeout)
+			results[i] = runOne(ctx, env, c, opts.Timeout, opts.AbandonGrace)
 		}()
 	}
 	wg.Wait()
@@ -67,7 +85,15 @@ func Run(ctx context.Context, env *Env, cs []Collector, opts RunOptions) []Resul
 	return results
 }
 
-func runOne(ctx context.Context, env *Env, c Collector, timeout time.Duration) (res Result) {
+// outcome is what a collector goroutine hands back to runOne.
+type outcome struct {
+	out      *Output
+	err      error
+	panicked any
+	stack    []byte
+}
+
+func runOne(ctx context.Context, env *Env, c Collector, timeout, grace time.Duration) (res Result) {
 	res = Result{Name: c.Name(), Version: c.Version(), StartedAt: env.Clock.Now()}
 	if timeout > 0 {
 		var cancel context.CancelFunc
@@ -77,17 +103,51 @@ func runOne(ctx context.Context, env *Env, c Collector, timeout time.Duration) (
 	log := env.Logger.With("collector", res.Name)
 	log.Debug("collector start")
 	defer func() {
-		if p := recover(); p != nil {
-			res.Status = StatusError
-			res.Err = fmt.Sprintf("panic: %v", p)
-			res.Output = &Output{}
-			log.Error("collector panicked", "panic", p, "stack", string(debug.Stack()))
-		}
 		res.Duration = env.Clock.Now().Sub(res.StartedAt)
 		log.Info("collector done", "status", res.Status, "records", len(res.Output.Records),
 			"captures", len(res.Output.Captures), "warnings", len(res.Output.Warnings))
 	}()
-	out, err := c.Collect(ctx, env)
+
+	// Buffered so an abandoned collector's goroutine can still finish.
+	done := make(chan outcome, 1)
+	go func() {
+		var o outcome
+		defer func() {
+			if p := recover(); p != nil {
+				o = outcome{panicked: p, stack: debug.Stack()}
+			}
+			done <- o
+		}()
+		o.out, o.err = c.Collect(ctx, env)
+	}()
+
+	var o outcome
+	select {
+	case o = <-done:
+	case <-ctx.Done():
+		// Give a collector that honours ctx the chance to return what it has.
+		t := time.NewTimer(grace)
+		select {
+		case o = <-done:
+			t.Stop()
+		case <-t.C:
+			res.Status = StatusError
+			res.Err = fmt.Sprintf("%v; collector abandoned after a further %s without returning", ctx.Err(), grace)
+			res.Output = &Output{}
+			res.Output.Warnf("collector did not return after its deadline and was abandoned; any partial output is discarded")
+			log.Error("collector abandoned", "err", ctx.Err(), "grace", grace)
+			return res
+		}
+	}
+
+	if o.panicked != nil {
+		res.Status = StatusError
+		res.Err = fmt.Sprintf("panic: %v", o.panicked)
+		res.Output = &Output{}
+		log.Error("collector panicked", "panic", o.panicked, "stack", string(o.stack))
+		return res
+	}
+	out, err := o.out, o.err
 	if out == nil {
 		out = &Output{}
 	}

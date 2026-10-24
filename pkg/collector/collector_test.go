@@ -149,6 +149,66 @@ func TestRunStatusesAndIsolation(t *testing.T) {
 	}
 }
 
+// TestRunAbandonsCollectorIgnoringContext: a collector stuck in a call that
+// never looks at ctx (e.g. a blocking open of a FIFO on a hostile host) must
+// not stall the run past Timeout + AbandonGrace, and must not hold up the
+// collectors queued behind it.
+func TestRunAbandonsCollectorIgnoringContext(t *testing.T) {
+	release := make(chan struct{})
+	t.Cleanup(func() { close(release) })
+	cs := []Collector{
+		&fake{name: "stuck", fn: func(context.Context) (*Output, error) {
+			<-release
+			return &Output{Records: []Record{rec{"late", "x"}}}, nil
+		}},
+		&fake{name: "after", fn: func(context.Context) (*Output, error) {
+			return &Output{Records: []Record{rec{"a", "1"}}}, nil
+		}},
+		&fake{name: "cooperative", fn: func(ctx context.Context) (*Output, error) {
+			<-ctx.Done()
+			return &Output{Records: []Record{rec{"partial", "1"}}}, nil
+		}},
+	}
+	start := time.Now()
+	res := Run(context.Background(), env(t), cs, RunOptions{Parallelism: 1, Timeout: 30 * time.Millisecond, AbandonGrace: 30 * time.Millisecond})
+	if el := time.Since(start); el > 3*time.Second {
+		t.Fatalf("run took %s; stuck collector was not abandoned", el)
+	}
+	got := map[string]Result{}
+	for _, r := range res {
+		got[r.Name] = r
+	}
+	if r := got["stuck"]; r.Status != StatusError || !strings.Contains(r.Err, "abandoned") ||
+		len(r.Output.Records) != 0 || len(r.Output.Warnings) != 1 {
+		t.Fatalf("stuck: %+v", r)
+	}
+	if r := got["after"]; r.Status != StatusOK || len(r.Output.Records) != 1 {
+		t.Fatalf("after: %+v", r)
+	}
+	// A collector that returns within the grace keeps its partial output.
+	if r := got["cooperative"]; r.Status != StatusError || len(r.Output.Records) != 1 ||
+		!strings.Contains(r.Err, "deadline") || strings.Contains(r.Err, "abandoned") {
+		t.Fatalf("cooperative: %+v", r)
+	}
+}
+
+// TestRunAbandonsOnParentCancel: cancelling the run (e.g. Ctrl-C) also bounds
+// a stuck collector when no per-collector timeout is set.
+func TestRunAbandonsOnParentCancel(t *testing.T) {
+	release := make(chan struct{})
+	t.Cleanup(func() { close(release) })
+	ctx, cancel := context.WithCancel(context.Background())
+	cs := []Collector{&fake{name: "stuck", fn: func(context.Context) (*Output, error) {
+		cancel()
+		<-release
+		return nil, nil
+	}}}
+	res := Run(ctx, env(t), cs, RunOptions{AbandonGrace: 10 * time.Millisecond})
+	if res[0].Status != StatusError || !strings.Contains(res[0].Err, "canceled") {
+		t.Fatalf("%+v", res[0])
+	}
+}
+
 func TestEncodeDeterministicAndDecode(t *testing.T) {
 	r := Result{Name: "x", Version: "1", Status: StatusOK, Output: &Output{Records: []Record{rec{"b", "2"}, rec{"a", "1"}, rec{"a", "0"}}}}
 	b1, err := r.Encode()
