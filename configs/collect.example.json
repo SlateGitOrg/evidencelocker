@@ -1,0 +1,23 @@
+{
+  "collectors": ["accounts", "filehash", "persistence", "processes", "sockets", "users"],
+  "parallelism": 2,
+  "timeout": "10m",
+  "options": {
+    "filehash": {
+      "dirs": ["/bin", "/sbin", "/usr/bin", "/usr/sbin", "/usr/local/bin", "/usr/local/sbin", "/tmp", "/var/tmp", "/dev/shm"],
+      "capture_dirs": ["/tmp", "/var/tmp", "/dev/shm"],
+      "max_file_size": 268435456,
+      "max_files": 250000,
+      "capture_max_size": 4194304,
+      "capture_total": 67108864,
+      "workers": 4
+    },
+    "persistence": {
+      "max_file_size": 1048576,
+      "extra_shell_rc": []
+    },
+    "sockets": {
+      "include_established": false
+    }
+  }
+}

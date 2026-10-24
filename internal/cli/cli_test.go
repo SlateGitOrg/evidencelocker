@@ -282,3 +282,17 @@ func TestCollectGuards(t *testing.T) {
 		t.Fatal("keygen overwrote a key")
 	}
 }
+
+// The shipped example config must stay valid.
+func TestExampleConfigLoads(t *testing.T) {
+	cfg, err := loadConfig(filepath.Join(testutil.RepoRoot(), "configs", "collect.example.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := builtin.Registry().Configure(cfg.Options); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := builtin.Registry().Select(cfg.Collectors); err != nil {
+		t.Fatal(err)
+	}
+}
