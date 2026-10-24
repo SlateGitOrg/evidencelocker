@@ -120,7 +120,7 @@ Exit codes: `0` success, `1` verification failure or diff findings at or above
 `testdata/hosts/{baseline,compromised}`. These are synthetic trees in which the
 "malware" is inert shell-script stand-ins and the attacker IPs come from the
 RFC 5737 documentation ranges. Excerpts from a run on 2026-10-24 (hashes and
-timestamps change per run because keys are generated fresh):
+timestamps change on every run because keys are generated fresh):
 
 ```
 == 3. collect the suspect host (same server, after the incident)
@@ -132,16 +132,16 @@ collectors
   processes    ok          11 records    0 captures   0 warnings
   sockets      ok           5 records    0 captures   0 warnings
   users        ok           2 records    0 captures   0 warnings
-bundle     .demo/web01-incident.tar.zst (10355 bytes, 27 entries)
+bundle     .demo/web01-incident.tar.zst (10357 bytes, 27 entries)
 merkle     76359c86b52ce0cb1ab0b5991c709f0fd8e7e5298f59cd1a61ee0c1f44ad36ae
-signed by  ed25519:b90068e7b9d8bec3e86ba587e3f0a026
+signed by  ed25519:90b605e93823445725835d0d4a405ec1
 
 == 5. hand custody to the analyst; analyst records an examination
 ==    the former custodian can no longer sign
-error: custody: signer ed25519:b90068e7b9d8bec3e86ba587e3f0a026 is not the current custodian (analyst holds custody)
-  0  2026-10-24T03:27:46.542176000Z  seal      responder [ed25519:b90068e7b9d8bec3e86ba587e3f0a026]  "live response, ticket 7731"
-  1  2026-10-24T03:27:46.567831000Z  transfer  responder [ed25519:b90068e7b9d8bec3e86ba587e3f0a026] -> analyst  "sealed bag 17, courier"
-  2  2026-10-24T03:27:46.581359000Z  access    analyst [ed25519:8eeedb6023edab4c00b253615c3c7886]  "opened in lab VM"
+error: custody: signer ed25519:90b605e93823445725835d0d4a405ec1 is not the current custodian (analyst holds custody)
+  0  2026-10-24T03:39:57.947900000Z  seal      responder [ed25519:90b605e93823445725835d0d4a405ec1]  "live response, ticket 7731"
+  1  2026-10-24T03:39:57.977049000Z  transfer  responder [ed25519:90b605e93823445725835d0d4a405ec1] -> analyst  "sealed bag 17, courier"
+  2  2026-10-24T03:39:57.990791000Z  access    analyst [ed25519:b9b750775cd827904482bd0af90e5f85]  "opened in lab VM"
 
 == 6. diff against the baseline (exit 1 = findings at/above medium)
 summary:  6 critical, 7 high, 1 medium, 2 low
@@ -161,31 +161,32 @@ summary:  6 critical, 7 high, 1 medium, 2 low
 ...
 
 == 7a. tamper: flip one byte inside files/etc/cron.d/sysupdate
+flipped tar byte 33320
 result   FAILED: 1 finding(s)
   - ENTRY_HASH_MISMATCH files/etc/cron.d/sysupdate: content SHA-256 38fc4302..., manifest says e47eb9e9... [tar bytes 33280-33368]
 
 == 7b. tamper: flip one byte of the compressed file, checked against the custody seal
-  - FILE_DIGEST_MISMATCH: bundle file SHA-256 bff1e4ed... differs from expected 425b51f4...
-  - CONTAINER_CORRUPT: compressed stream corrupt (zstd: CRC check failed); ...
-  - line 1 (seq 0) BUNDLE_BINDING: sealed bundle SHA-256 425b51f4..., bundle file is bff1e4ed...
+  - FILE_DIGEST_MISMATCH: bundle file SHA-256 fc2fb403... differs from expected 24849869...
+  - CONTAINER_CORRUPT: compressed stream corrupt (zstd: CRC check failed); decoding stopped while reading tar header
+  - line 1 (seq 0) BUNDLE_BINDING: sealed bundle SHA-256 24849869..., bundle file is fc2fb403...
 
 == 7c. tamper: rewrite a custody note after the fact
-  - line 2 (seq 1) HASH_MISMATCH: entry hash 99ee1eed..., recorded da23b2b6... (entry content altered)
+  - line 2 (seq 1) HASH_MISMATCH: entry hash fff24a8b..., recorded c16c7f68... (entry content altered)
   - line 2 (seq 1) SIGNATURE_INVALID: signature by responder does not verify
 
 == 7d. tamper: drop the newest custody entry (caught only with an out-of-band head)
-custody  .demo/t-truncated.jsonl: 2 entries, current custodian analyst, head da23b2b6...: OK
-  - log HEAD_MISMATCH: expected head d85a1dc04095edea… not found: log was truncated or rewritten
+custody  .demo/t-truncated.jsonl: 2 entries, current custodian analyst, head c16c7f68...: OK
+  - log HEAD_MISMATCH: expected head b1fa2f8f03c03b66… not found: log was truncated or rewritten
 
 == 8. selective disclosure: prove one file is in the sealed bundle
 proof    OK: files/etc/cron.d/sysupdate (88 bytes, sha256 e47eb9e9...)
-         leaf 8 of 27 under root 76359c86..., case IR-2026-042, trusted signer ed25519:b90068e7...
+         leaf 8 of 27 under root 76359c86..., case IR-2026-042, trusted signer ed25519:90b605e9...
 content  matches the proven entry
 ```
 
-Long hashes are shortened with `...` above. Every line is otherwise unedited
-output from that run, apart from the 7b `CONTAINER_CORRUPT` line, whose wording
-was refined after the run. The full transcript is in the build report.
+The excerpt omits some lines, marked `...`, and shortens long hashes to 8
+characters followed by `...`. All other text is verbatim. The full transcript
+is in the build report.
 
 ## Design decisions (short version)
 
@@ -221,14 +222,14 @@ mutant:
 
 ```
 bundle: fixture "compromised", 27 entries, 61952 bytes tar, 10321 bytes compressed, mask 0xff, stride 1
-tar stream:  61952/61952 flips detected (100.00%), 61952/61952 localised to the flipped byte's region (100.00%) in 24.657s
+tar stream:  61952/61952 flips detected (100.00%), 61952/61952 localised to the flipped byte's region (100.00%) in 28.286s
     first finding CONTAINER_CORRUPT           16354
     first finding ENTRY_HASH_MISMATCH         28994
     first finding HEAD_INVALID                  322
     first finding LAYOUT_NONCANONICAL         10244
     first finding MANIFEST_DIGEST_MISMATCH     5772
     first finding SIGNATURE_INVALID             266
-compressed:  10321/10321 flips detected (100.00%) without any external digest in 2.127s
+compressed:  10321/10321 flips detected (100.00%) without any external digest in 3.794s
     first finding CONTAINER_CORRUPT           10321
 ```
 
@@ -247,9 +248,9 @@ comparing a bundle with itself yields zero findings. This is a fixture test,
 not a detection-rate measurement. The fixture was written by the same person
 who wrote the rules.
 
-**Coverage.** `make cover` (`scripts/coverage.sh 80`) reports **89.9%** of
-statements over `./pkg/... ./internal/...` on the last run. The gate requires at
-least 80%.
+**Coverage.** `make cover` (`scripts/coverage.sh 80`) reports **90.0%** of
+statements over `./pkg/... ./internal/...`, measured in a fresh clone on
+2026-10-24. The gate requires at least 80%.
 
 **Throughput.** `make bench` (`scripts/bench.sh`, `-benchtime 5x`) ran on an
 Apple M1 Pro (8 cores) while other build jobs were running (load average
@@ -264,8 +265,9 @@ Apple M1 Pro (8 cores) while other build jobs were running (load average
 | Inclusion proof + verify, 100k-leaf tree | 2.1 µs |
 
 **Size.** `git ls-files '*.go' | grep -v _test.go | grep -v -E '^(internal/fixtures|tools|examples)/' | xargs wc -l`
-→ 7,132 lines of non-test Go across the libraries, CLI and test helpers,
-including comments.
+counts 7,160 lines of non-test Go across the libraries, CLI and test helpers,
+including comments. `git ls-files '*.go' | grep _test.go | xargs cat | wc -l`
+counts 3,403 lines of tests.
 
 ## Limitations
 
