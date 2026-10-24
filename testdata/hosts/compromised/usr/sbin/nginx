@@ -1,0 +1,3 @@
+#!/bin/sh
+# evidencelocker fixture stand-in for nginx; inert.
+exit 0

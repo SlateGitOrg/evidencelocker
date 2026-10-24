@@ -1,0 +1,8 @@
+Name:	stage2
+Umask:	0022
+State:	S (sleeping)
+Tgid:	4300
+Pid:	4300
+PPid:	4242
+Uid:	33	33	33	33
+Gid:	33	33	33	33

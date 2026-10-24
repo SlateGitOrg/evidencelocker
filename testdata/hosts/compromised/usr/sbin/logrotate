@@ -1,0 +1,3 @@
+#!/bin/sh
+# evidencelocker fixture stand-in for logrotate; inert.
+exit 0

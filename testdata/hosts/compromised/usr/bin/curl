@@ -1,0 +1,3 @@
+#!/bin/sh
+# evidencelocker fixture stand-in for curl; inert.
+exit 0

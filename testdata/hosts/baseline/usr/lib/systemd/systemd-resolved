@@ -1,0 +1,3 @@
+#!/bin/sh
+# evidencelocker fixture stand-in for systemd-resolved; inert.
+exit 0

@@ -1,0 +1,8 @@
+Name:	sshd
+Umask:	0022
+State:	S (sleeping)
+Tgid:	1190
+Pid:	1190
+PPid:	612
+Uid:	1000	1000	1000	1000
+Gid:	1000	1000	1000	1000

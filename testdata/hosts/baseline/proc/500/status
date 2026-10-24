@@ -1,0 +1,8 @@
+Name:	systemd-resolve
+Umask:	0022
+State:	S (sleeping)
+Tgid:	500
+Pid:	500
+PPid:	1
+Uid:	991	991	991	991
+Gid:	991	991	991	991

@@ -1,0 +1,3 @@
+#!/bin/sh
+# evidencelocker fixture stand-in for cron; inert.
+exit 0

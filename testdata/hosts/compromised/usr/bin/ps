@@ -1,0 +1,3 @@
+#!/bin/sh
+# evidencelocker fixture stand-in for ps; inert.
+exit 0

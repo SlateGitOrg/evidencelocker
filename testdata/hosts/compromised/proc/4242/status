@@ -1,0 +1,8 @@
+Name:	kworkerd
+Umask:	0022
+State:	S (sleeping)
+Tgid:	4242
+Pid:	4242
+PPid:	1
+Uid:	33	33	33	33
+Gid:	33	33	33	33

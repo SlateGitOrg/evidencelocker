@@ -1,0 +1,4 @@
+#!/bin/sh
+# evidencelocker fixture stand-in for ls; inert.
+exit 0
+# trojanised copy (fixture)

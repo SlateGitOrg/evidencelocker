@@ -1,0 +1,12 @@
+[Unit]
+Description=A high performance web server
+After=network.target
+
+[Service]
+Type=forking
+ExecStartPre=/usr/sbin/nginx -t -q
+ExecStart=/usr/sbin/nginx -g 'daemon on; master_process on;'
+ExecReload=/usr/sbin/nginx -s reload
+
+[Install]
+WantedBy=multi-user.target

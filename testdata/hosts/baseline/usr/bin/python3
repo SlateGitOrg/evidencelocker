@@ -1,0 +1,3 @@
+#!/bin/sh
+# evidencelocker fixture stand-in for python3; inert.
+exit 0
