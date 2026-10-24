@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -99,7 +100,7 @@ func TestModesLinksAndLimits(t *testing.T) {
 	if len(caps) != 1 || caps["/tmp/huge"] != nil {
 		t.Fatalf("capture budget/size not enforced: %v", len(caps))
 	}
-	if !strings.Contains(strings.Join(warns, ";"), "capture budget exhausted") {
+	if !strings.Contains(strings.Join(warns, ";"), "capture budget of 150 bytes exhausted; 1 staging-dir files") {
 		t.Fatalf("warnings %v", warns)
 	}
 
@@ -154,5 +155,34 @@ func TestDigestIgnoresMtime(t *testing.T) {
 	b.Mode = "4755"
 	if a.Digest() == b.Digest() {
 		t.Fatal("mode must affect digest")
+	}
+}
+
+func TestWarningsAreCappedAndVanishedFilesDropped(t *testing.T) {
+	if os.Geteuid() == 0 {
+		t.Skip("root can read mode-000 files")
+	}
+	dir := t.TempDir()
+	bin := filepath.Join(dir, "usr", "bin")
+	os.MkdirAll(bin, 0o755)
+	for i := 0; i < maxDetailedWarnings+5; i++ {
+		p := filepath.Join(bin, "locked"+strconv.Itoa(i))
+		os.WriteFile(p, []byte("x"), 0o000)
+	}
+	c := New()
+	if err := c.Configure(json.RawMessage(`{"dirs":["/usr/bin"]}`)); err != nil {
+		t.Fatal(err)
+	}
+	fs, warns, partial, _ := collect(t, c, dir)
+	if len(fs) != maxDetailedWarnings+5 || !partial || len(warns) != maxDetailedWarnings+1 ||
+		!strings.Contains(warns[len(warns)-1], "5 more unreadable files") {
+		t.Fatalf("records=%d partial=%v warnings=%d last=%q", len(fs), partial, len(warns), warns[len(warns)-1])
+	}
+	// A file removed after listing is dropped and counted, not warned per file.
+	env := testutil.Env(t, dir)
+	it := item{rec: File{Path: "/usr/bin/ghost", Type: "file"}}
+	c.hashOne(env, &it, make([]byte, 1024))
+	if !it.vanished || it.err != "" {
+		t.Fatalf("vanished file: %+v", it)
 	}
 }

@@ -118,10 +118,19 @@ func (c *Collector) Collect(ctx context.Context, env *collector.Env) (*collector
 	}
 	c.hashAll(ctx, env, files)
 	captureBudget := c.opts.CaptureTotal
+	vanished, unreadable, uncaptured := 0, 0, 0
 	for i := range files {
 		f := &files[i]
+		if f.vanished {
+			// Normal churn on a live system (temp files, sockets).
+			vanished++
+			continue
+		}
 		if f.err != "" {
-			out.Warnf("%s: %s", f.rec.Path, f.err)
+			unreadable++
+			if unreadable <= maxDetailedWarnings {
+				out.Warnf("%s: %s", f.rec.Path, f.err)
+			}
 			out.Partial = true
 		}
 		out.Records = append(out.Records, f.rec)
@@ -130,9 +139,19 @@ func (c *Collector) Collect(ctx context.Context, env *collector.Env) (*collector
 				captureBudget -= int64(len(f.capture))
 				out.Captures = append(out.Captures, collector.Capture{Path: f.rec.Path, Data: f.capture})
 			} else {
-				out.Warnf("capture budget exhausted; %s not captured", f.rec.Path)
+				uncaptured++
 			}
 		}
+	}
+	if unreadable > maxDetailedWarnings {
+		out.Warnf("%d more unreadable files not listed individually", unreadable-maxDetailedWarnings)
+	}
+	if uncaptured > 0 {
+		out.Warnf("capture budget of %d bytes exhausted; %d staging-dir files hashed but not captured", c.opts.CaptureTotal, uncaptured)
+		out.Partial = true
+	}
+	if vanished > 0 {
+		out.Warnf("%d files disappeared between listing and hashing (live-system churn); not recorded", vanished)
 	}
 	if err := ctx.Err(); err != nil {
 		out.Partial = true
@@ -141,11 +160,16 @@ func (c *Collector) Collect(ctx context.Context, env *collector.Env) (*collector
 	return out, nil
 }
 
+// maxDetailedWarnings caps per-file warnings so a directory full of
+// unreadable files cannot bloat the record file; the rest are counted.
+const maxDetailedWarnings = 50
+
 type item struct {
-	rec     File
-	capture []byte
-	wantCap bool
-	err     string
+	rec      File
+	capture  []byte
+	wantCap  bool
+	err      string
+	vanished bool
 }
 
 // enumerate walks the configured directories (deduplicating ones that
@@ -294,6 +318,10 @@ func (c *Collector) hashOne(env *collector.Env, it *item, buf []byte) {
 		return
 	}
 	f, fi, err := env.Root.OpenRegular(r.Path)
+	if errors.Is(err, fs.ErrNotExist) {
+		it.vanished = true
+		return
+	}
 	if err != nil {
 		it.err = err.Error()
 		r.Skipped = "unreadable"
