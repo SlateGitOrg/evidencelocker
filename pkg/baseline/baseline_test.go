@@ -10,6 +10,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/archit2501/evidencelocker/internal/sealtest"
 	"github.com/archit2501/evidencelocker/internal/testutil"
 	"github.com/archit2501/evidencelocker/pkg/bundle"
 	"github.com/archit2501/evidencelocker/pkg/collector"
@@ -39,8 +40,8 @@ func trusted() bundle.VerifyOptions {
 func snapshots(t *testing.T) (*Snapshot, *Snapshot) {
 	t.Helper()
 	once.Do(func() {
-		b := testutil.SealFixture(t, "baseline", dir)
-		c := testutil.SealFixture(t, "compromised", dir)
+		b := sealtest.SealFixture(t, "baseline", dir)
+		c := sealtest.SealFixture(t, "compromised", dir)
 		if base, loadErr = LoadSnapshot(b, trusted()); loadErr != nil {
 			return
 		}
@@ -194,7 +195,9 @@ func TestGenericAndMissingCollectors(t *testing.T) {
 	mk := func(recs ...collector.StoredRecord) *collector.RecordFile {
 		return &collector.RecordFile{Collector: "custom", Status: collector.StatusOK, Records: recs}
 	}
-	r := func(k, d string) collector.StoredRecord { return collector.StoredRecord{Key: k, Digest: d, Data: json.RawMessage(`{}`)} }
+	r := func(k, d string) collector.StoredRecord {
+		return collector.StoredRecord{Key: k, Digest: d, Data: json.RawMessage(`{}`)}
+	}
 	b := &Snapshot{Collectors: map[string]*collector.RecordFile{"custom": mk(r("a", "1"), r("b", "1")), "onlybase": mk()}}
 	c := &Snapshot{Collectors: map[string]*collector.RecordFile{"custom": mk(r("b", "2"), r("c", "1"))}}
 	c.Collectors["custom"].Status = collector.StatusPartial

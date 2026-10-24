@@ -95,7 +95,7 @@ func TestConfigure(t *testing.T) {
 		t.Fatalf("configure: %v level=%d", err, f.opts.Level)
 	}
 	for _, bad := range []map[string]json.RawMessage{
-		{"alpha": json.RawMessage(`{"levle":3}`)},
+		{"alpha": json.RawMessage(`{"lvl":3}`)},
 		{"nope": json.RawMessage(`{}`)},
 		{"plain": json.RawMessage(`{}`)},
 	} {
