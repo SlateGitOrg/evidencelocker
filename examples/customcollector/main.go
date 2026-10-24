@@ -18,8 +18,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/archit2501/evidencelocker/pkg/cli"
 	"github.com/archit2501/evidencelocker/pkg/baseline"
+	"github.com/archit2501/evidencelocker/pkg/cli"
 	"github.com/archit2501/evidencelocker/pkg/collector"
 	"github.com/archit2501/evidencelocker/pkg/collectors/builtin"
 )

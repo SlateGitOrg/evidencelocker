@@ -102,7 +102,7 @@ func run(fixture string, mask byte, stride int) error {
 	for off := 0; off < len(z); off += stride {
 		mut := append([]byte(nil), z...)
 		mut[off] ^= mask
-		if err := os.WriteFile(p, mut, 0o600); err != nil {
+		if err := os.WriteFile(p, mut, 0o600); err != nil { //nolint:gosec // G703: p is inside our own MkdirTemp dir
 			return err
 		}
 		rep, err := bundle.VerifyFile(p, opts)
