@@ -41,7 +41,7 @@ func ParseUnit(text string) Unit {
 		line := strings.TrimSpace(lines[i])
 		for strings.HasSuffix(line, `\`) && i+1 < len(lines) {
 			i++
-			line = strings.TrimSuffix(line, `\`) + " " + strings.TrimSpace(lines[i])
+			line = strings.TrimSpace(strings.TrimSuffix(line, `\`)) + " " + strings.TrimSpace(lines[i])
 		}
 		if line == "" || line[0] == '#' || line[0] == ';' {
 			continue
