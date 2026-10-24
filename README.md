@@ -78,7 +78,7 @@ flowchart LR
 | `pkg/custody` | Signed, hash-chained custody log |
 | `pkg/baseline` | Snapshot loading (verified), diff engine, severity rules, text renderer |
 | `pkg/triage` | Collect → seal → custody pipeline used by the CLI and embedders |
-| `internal/cli` | Command-line front end (`evidencelocker`) |
+| `pkg/cli` | Command-line front end (`evidencelocker`) |
 
 For the algorithms, invariants and complexity, see
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). The byte-level format is in

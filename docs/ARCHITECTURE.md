@@ -209,4 +209,4 @@ time of sealing (see README).
 | Fuzzing | `FuzzVerifyTar`, `FuzzCustodyVerify`, `FuzzVerifyInclusion`, `FuzzParsePlist`, `FuzzParseCronLine`, `FuzzParseUtmp` (`make fuzz`) |
 | Golden fixture expectations | every collector against `testdata/hosts/*`; `TestCompromisedVsBaseline` |
 | Fixture integrity | `TestFixturesUpToDate` regenerates the trees and compares them with the committed copies |
-| End to end | `internal/cli/cli_test.go`, `examples/customcollector`, `make demo` (asserts every exit code) |
+| End to end | `pkg/cli/cli_test.go`, `examples/customcollector`, `make demo` (asserts every exit code) |

@@ -20,7 +20,7 @@ import (
 )
 
 // Version is the tool version recorded in manifests (overridable with
-// -ldflags "-X github.com/archit2501/evidencelocker/internal/cli.Version=...").
+// -ldflags "-X github.com/archit2501/evidencelocker/pkg/cli.Version=...").
 var Version = "0.1.0"
 
 // Exit codes.
