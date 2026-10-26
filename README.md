@@ -189,7 +189,7 @@ characters followed by `...`. All other text is verbatim.
 
 ## Design decisions (short version)
 
-Full rulings, with what each one costs if it is wrong, are in
+Full design decisions, with what each one costs if it is wrong, are in
 [DECISIONS.md](DECISIONS.md).
 
 - **A canonical layout replaces trusting the parser.** A tar reader ignores
