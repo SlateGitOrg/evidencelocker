@@ -12,6 +12,8 @@ rm -rf "$D"
 mkdir -p "$D" bin
 $GO build -o "$EL" ./cmd/evidencelocker
 $GO build -o bin/tamper ./tools/tamper
+# the committed fixtures hold no symlinks; recreate them from the manifest
+$GO run ./tools/genfixtures -materialize testdata/hosts -out "$D/hosts"
 
 step() { printf '\n\033[1m== %s\033[0m\n$ %s\n' "$1" "${*:2}"; }
 # expect CODE CMD...: run CMD, show output, fail the demo if exit code differs.
@@ -25,12 +27,12 @@ step "1. keys for the collecting responder and the receiving analyst" "$EL keyge
 $EL keygen --out $D/responder
 $EL keygen --out $D/analyst
 
-step "2. collect the known-good baseline image" "$EL collect --root testdata/hosts/baseline ..."
-$EL collect --root testdata/hosts/baseline --out $D/web01-baseline.tar.zst --key $D/responder.key \
+step "2. collect the known-good baseline image" "$EL collect --root $D/hosts/baseline ..."
+$EL collect --root $D/hosts/baseline --out $D/web01-baseline.tar.zst --key $D/responder.key \
 	--case IR-2026-042 --examiner responder --note "golden image from build pipeline"
 
-step "3. collect the suspect host (same server, after the incident)" "$EL collect --root testdata/hosts/compromised ..."
-$EL collect --root testdata/hosts/compromised --out $D/web01-incident.tar.zst --key $D/responder.key \
+step "3. collect the suspect host (same server, after the incident)" "$EL collect --root $D/hosts/compromised ..."
+$EL collect --root $D/hosts/compromised --out $D/web01-incident.tar.zst --key $D/responder.key \
 	--case IR-2026-042 --examiner responder --note "live response, ticket 7731"
 
 step "4. verify bundle + custody log, pinning the responder key" \

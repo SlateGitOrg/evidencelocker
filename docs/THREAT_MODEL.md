@@ -5,7 +5,8 @@ that the operator is authorised to examine, and it makes the resulting
 evidence tamper-evident. It contains no offensive capability: no exploitation,
 no credential access (it never reads `/etc/shadow`, keychains or private keys
 on the target), no stealth, and no network activity. All demos and tests run
-against synthetic fixture trees committed in `testdata/hosts`. In those trees
+against synthetic fixture trees committed in `testdata/hosts` (symlinks are listed in
+`testdata/hosts/symlinks.txt` and created at test time). In those trees
 the "malicious" binaries are inert shell scripts and the attacker addresses
 come from the RFC 5737 documentation ranges.
 

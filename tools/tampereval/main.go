@@ -21,6 +21,7 @@ import (
 
 	"github.com/klauspost/compress/zstd"
 
+	"github.com/SlateGitOrg/evidencelocker/internal/fixtree"
 	"github.com/SlateGitOrg/evidencelocker/pkg/bundle"
 	"github.com/SlateGitOrg/evidencelocker/pkg/collector"
 	"github.com/SlateGitOrg/evidencelocker/pkg/collectors/builtin"
@@ -47,11 +48,15 @@ func run(fixture string, mask byte, stride int) error {
 		return err
 	}
 	defer func() { _ = os.RemoveAll(work) }()
+	hosts := filepath.Join(work, "hosts")
+	if err := fixtree.Materialize(filepath.Join("testdata", "hosts"), hosts); err != nil {
+		return err
+	}
 	key := ed25519.NewKeyFromSeed(bytes.Repeat([]byte{5}, 32))
 	opts := bundle.VerifyOptions{TrustedKeys: []ed25519.PublicKey{key.Public().(ed25519.PublicKey)}}
 	out := filepath.Join(work, "b.tar.zst")
 	res, err := triage.Run(context.Background(), triage.Options{
-		Root: filepath.Join("testdata", "hosts", fixture), Registry: builtin.Registry(), CaseID: "EVAL",
+		Root: filepath.Join(hosts, fixture), Registry: builtin.Registry(), CaseID: "EVAL",
 		Examiner: "eval", Signer: key, Out: out, ToolVersion: "eval",
 		Clock: collector.FixedClock{T: time.Date(2026, 10, 1, 0, 0, 0, 0, time.UTC)},
 	})

@@ -55,12 +55,12 @@ func setup(t *testing.T) workspace {
 	mustOK(t, run(t, "keygen", "--out", filepath.Join(d, "analyst")))
 	cfg := filepath.Join(d, "cfg.json")
 	os.WriteFile(cfg, []byte(`{"parallelism":3,"timeout":"1m","options":{"filehash":{"workers":2}}}`), 0o600)
-	r := mustOK(t, run(t, "collect", "--root", testutil.Fixture("baseline"), "--out", w.base, "--key", w.collectorKey,
+	r := mustOK(t, run(t, "collect", "--root", testutil.Fixture(t, "baseline"), "--out", w.base, "--key", w.collectorKey,
 		"--case", "IR-9", "--examiner", "first responder", "--config", cfg))
 	if !strings.Contains(r.stdout, "persistence  ok") || !strings.Contains(r.stdout, "web01") {
 		t.Fatalf("collect output:\n%s", r.stdout)
 	}
-	mustOK(t, run(t, "collect", "--root", testutil.Fixture("compromised"), "--out", w.cur, "--key", w.collectorKey,
+	mustOK(t, run(t, "collect", "--root", testutil.Fixture(t, "compromised"), "--out", w.cur, "--key", w.collectorKey,
 		"--case", "IR-9", "--examiner", "first responder", "--note", "seized 09:00"))
 	return w
 }
@@ -245,7 +245,7 @@ func TestUsageErrors(t *testing.T) {
 func TestCollectGuards(t *testing.T) {
 	w := setup(t)
 	// Refuses to overwrite an existing bundle.
-	r := run(t, "collect", "--root", testutil.Fixture("baseline"), "--out", w.base, "--key", w.collectorKey, "--case", "c", "--examiner", "e")
+	r := run(t, "collect", "--root", testutil.Fixture(t, "baseline"), "--out", w.base, "--key", w.collectorKey, "--case", "c", "--examiner", "e")
 	if r.code != ExitUsage || !strings.Contains(r.stderr, "already exists") {
 		t.Fatalf("overwrite: %d %s", r.code, r.stderr)
 	}
@@ -259,11 +259,11 @@ func TestCollectGuards(t *testing.T) {
 	if r := run(t, "collect", "--out", out, "--key", w.collectorKey, "--case", "c", "--examiner", "e", "--config", cfg); r.code != ExitUsage {
 		t.Fatal("bad timeout accepted")
 	}
-	if r := run(t, "collect", "--root", testutil.Fixture("macos"), "--out", out, "--key", w.collectorKey, "--case", "c",
+	if r := run(t, "collect", "--root", testutil.Fixture(t, "macos"), "--out", out, "--key", w.collectorKey, "--case", "c",
 		"--examiner", "e", "--collectors", "persistence,nope"); r.code != ExitUsage || !strings.Contains(r.stderr, "unknown collector") {
 		t.Fatalf("unknown collector: %d %s", r.code, r.stderr)
 	}
-	r = mustOK(t, run(t, "--log-level", "debug", "--log-format", "json", "collect", "--root", testutil.Fixture("macos"), "--out", out,
+	r = mustOK(t, run(t, "--log-level", "debug", "--log-format", "json", "collect", "--root", testutil.Fixture(t, "macos"), "--out", out,
 		"--key", w.collectorKey, "--case", "c", "--examiner", "e", "--collectors", "persistence,processes", "--parallel", "1",
 		"--timeout", "30s", "--hostname", "mbp"))
 	if !strings.Contains(r.stdout, "host       mbp (macOS 15.6)") || !strings.Contains(r.stdout, "processes    skipped") ||

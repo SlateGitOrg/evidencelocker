@@ -3,7 +3,7 @@
 // register it next to the built-ins, optionally add a baseline.Rule, and
 // hand the registry to the stock CLI.
 //
-//	go run ./examples/customcollector collect --root testdata/hosts/baseline ...
+//	go run ./examples/customcollector collect --root .demo/hosts/baseline ...
 //
 // Every CLI command then knows about "hosts-file": it is collected, sealed,
 // verified, and diffed like a built-in.

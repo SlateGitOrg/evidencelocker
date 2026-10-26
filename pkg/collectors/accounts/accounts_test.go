@@ -13,7 +13,7 @@ import (
 )
 
 func TestCompromisedFixture(t *testing.T) {
-	out, err := New().Collect(context.Background(), testutil.Env(t, testutil.Fixture("compromised")))
+	out, err := New().Collect(context.Background(), testutil.Env(t, testutil.Fixture(t, "compromised")))
 	if err != nil {
 		t.Fatal(err)
 	}

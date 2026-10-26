@@ -21,7 +21,7 @@ func SealFixture(t testing.TB, name, dir string) string {
 	t.Helper()
 	out := filepath.Join(dir, name+".tar.zst")
 	_, err := triage.Run(context.Background(), triage.Options{
-		Root: testutil.Fixture(name), Registry: builtin.Registry(), CaseID: "IR-TEST", Examiner: "tester",
+		Root: testutil.Fixture(t, name), Registry: builtin.Registry(), CaseID: "IR-TEST", Examiner: "tester",
 		Signer: testutil.TestKey(), Out: out, ToolVersion: "test",
 		Clock: collector.FixedClock{T: time.Date(2026, 10, 1, 12, 0, 0, 0, time.UTC)},
 	})

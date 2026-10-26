@@ -48,7 +48,7 @@ func find(es []Entry, loc string) *Entry {
 }
 
 func TestBaselineFixture(t *testing.T) {
-	es := run(t, testutil.Fixture("baseline"))
+	es := run(t, testutil.Fixture(t, "baseline"))
 	got := countBy(es)
 	want := map[string]int{MechCron: 3, MechCronScript: 1, MechSystemd: 3, MechShellRC: 6, MechSSHKey: 1}
 	for k, v := range want {
@@ -70,7 +70,7 @@ func TestBaselineFixture(t *testing.T) {
 }
 
 func TestCompromisedFixture(t *testing.T) {
-	es := run(t, testutil.Fixture("compromised"))
+	es := run(t, testutil.Fixture(t, "compromised"))
 	c := find(es, "/etc/cron.d/sysupdate")
 	if c == nil || c.User != "root" || c.Trigger != "*/5 * * * *" || !slices.Contains(c.Notes, "download-piped-to-shell") || c.Line != 2 {
 		t.Fatalf("sysupdate cron: %+v", c)
@@ -103,7 +103,7 @@ func TestCompromisedFixture(t *testing.T) {
 }
 
 func TestMacOSFixture(t *testing.T) {
-	es := run(t, testutil.Fixture("macos"))
+	es := run(t, testutil.Fixture(t, "macos"))
 	if got := countBy(es); got[MechLaunchd] != 3 || got[MechShellRC] != 1 {
 		t.Fatalf("mechanisms %v", got)
 	}

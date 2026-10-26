@@ -20,7 +20,7 @@ import (
 func TestRunProducesVerifiableBundleAndLog(t *testing.T) {
 	out := filepath.Join(t.TempDir(), "b.tar.zst")
 	res, err := triage.Run(context.Background(), triage.Options{
-		Root: testutil.Fixture("compromised"), Registry: builtin.Registry(), CaseID: "C1",
+		Root: testutil.Fixture(t, "compromised"), Registry: builtin.Registry(), CaseID: "C1",
 		Examiner: "tester", Signer: testutil.TestKey(), Out: out,
 	})
 	if err != nil {
@@ -40,7 +40,7 @@ func TestRunProducesVerifiableBundleAndLog(t *testing.T) {
 		t.Fatalf("custody: %v %v", err, crep.Findings)
 	}
 	// Second run must refuse to overwrite.
-	if _, err := triage.Run(context.Background(), triage.Options{Root: testutil.Fixture("baseline"), Registry: builtin.Registry(),
+	if _, err := triage.Run(context.Background(), triage.Options{Root: testutil.Fixture(t, "baseline"), Registry: builtin.Registry(),
 		CaseID: "C1", Examiner: "tester", Signer: testutil.TestKey(), Out: out}); err == nil || !strings.Contains(err.Error(), "already exists") {
 		t.Fatalf("overwrite: %v", err)
 	}
@@ -62,7 +62,7 @@ func TestRunValidation(t *testing.T) {
 		t.Fatal("absent root")
 	}
 	bad = base
-	bad.Root = testutil.Fixture("baseline")
+	bad.Root = testutil.Fixture(t, "baseline")
 	bad.CustodyLog = filepath.Join(t.TempDir(), "no", "such", "dir", "log")
 	if _, err := triage.Run(context.Background(), bad); err == nil || !strings.Contains(err.Error(), "custody") {
 		t.Fatalf("custody failure not reported: %v", err)
@@ -94,7 +94,7 @@ func TestHostInfo(t *testing.T) {
 		t.Cleanup(func() { r.Close() })
 		return r
 	}
-	if h := triage.HostInfo(open(testutil.Fixture("macos")), ""); h.OS != "macOS 15.6" || h.Hostname != "macos" {
+	if h := triage.HostInfo(open(testutil.Fixture(t, "macos")), ""); h.OS != "macOS 15.6" || h.Hostname != "macos" {
 		t.Fatalf("macos: %+v", h)
 	}
 	dir := t.TempDir()

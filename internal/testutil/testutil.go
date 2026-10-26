@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/SlateGitOrg/evidencelocker/internal/fixtree"
 	"github.com/SlateGitOrg/evidencelocker/pkg/collector"
 	"github.com/SlateGitOrg/evidencelocker/pkg/fsroot"
 )
@@ -21,9 +22,17 @@ func RepoRoot() string {
 	return filepath.Join(filepath.Dir(file), "..", "..")
 }
 
-// Fixture returns the path of a committed fixture host tree.
-func Fixture(name string) string {
-	return filepath.Join(RepoRoot(), "testdata", "hosts", name)
+// Fixture materialises the committed fixture host tree name into a fresh
+// temporary directory (regular files copied, symlinks recreated from
+// testdata/hosts/symlinks.txt) and returns its path. The committed tree holds
+// no symlinks, so tests never depend on them surviving a copy of the repo.
+func Fixture(t testing.TB, name string) string {
+	t.Helper()
+	dst := filepath.Join(t.TempDir(), "hosts")
+	if err := fixtree.Materialize(filepath.Join(RepoRoot(), "testdata", "hosts"), dst); err != nil {
+		t.Fatal(err)
+	}
+	return filepath.Join(dst, name)
 }
 
 // Env opens dir as a collection root with a fixed clock and silent logger.

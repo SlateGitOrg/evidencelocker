@@ -117,7 +117,8 @@ Exit codes: `0` success, `1` verification failure or diff findings at or above
 ## Demo output (real run)
 
 `make demo` (`scripts/demo.sh`) runs entirely offline against
-`testdata/hosts/{baseline,compromised}`. These are synthetic trees in which the
+`testdata/hosts/{baseline,compromised}` (the demo first materialises them into
+`.demo/hosts`, see below). These are synthetic trees in which the
 "malware" is inert shell-script stand-ins and the attacker IPs come from the
 RFC 5737 documentation ranges. Excerpts from a run on 2026-10-24 (hashes and
 timestamps change on every run because keys are generated fresh):
@@ -320,7 +321,7 @@ counts 3,653 lines of tests.
 cmd/evidencelocker/   CLI entry point
 pkg/                  fsroot, collector(s), merkle, keys, bundle, custody, baseline, triage, cli
 internal/             test helpers and synthetic fixtures
-testdata/hosts/       baseline and compromised fixture trees
+testdata/hosts/       baseline and compromised fixture trees (regular files + symlinks.txt manifest)
 tools/tampereval/     exhaustive tamper evaluation
 docs/                 architecture, bundle format, custody, collectors, threat model
 ```
@@ -330,3 +331,12 @@ See also [DECISIONS.md](DECISIONS.md) and [DATA.md](DATA.md).
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+### Fixture symlinks
+
+`testdata/hosts` contains no symlinks on disk (many tools that copy a
+repository keep regular files only). `symlinks.txt` lists them as
+`path -> target`; tests get a fully linked copy from `testutil.Fixture(t, name)`,
+and `go run ./tools/genfixtures -materialize testdata/hosts -out DIR` does the
+same by hand (`make demo` runs it for you). `make fixtures` regenerates the tree
+and the manifest.

@@ -18,7 +18,7 @@ func collect(t *testing.T, dir string) (*collector.Output, error) {
 }
 
 func TestCompromisedFixture(t *testing.T) {
-	out, err := collect(t, testutil.Fixture("compromised"))
+	out, err := collect(t, testutil.Fixture(t, "compromised"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -69,7 +69,7 @@ func TestBrokenProcessIsWarned(t *testing.T) {
 func TestCancelled(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
-	out, err := New().Collect(ctx, testutil.Env(t, testutil.Fixture("baseline")))
+	out, err := New().Collect(ctx, testutil.Env(t, testutil.Fixture(t, "baseline")))
 	if err == nil || !out.Partial {
 		t.Fatal("cancellation ignored")
 	}

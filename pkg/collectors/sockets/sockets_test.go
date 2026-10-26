@@ -25,7 +25,7 @@ func keys(out *collector.Output) []string {
 }
 
 func TestCompromisedFixture(t *testing.T) {
-	out, err := New().Collect(context.Background(), testutil.Env(t, testutil.Fixture("compromised")))
+	out, err := New().Collect(context.Background(), testutil.Env(t, testutil.Fixture(t, "compromised")))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -53,7 +53,7 @@ func TestIncludeEstablished(t *testing.T) {
 	if err := c.Configure(json.RawMessage(`{"include_established":true}`)); err != nil {
 		t.Fatal(err)
 	}
-	out, err := c.Collect(context.Background(), testutil.Env(t, testutil.Fixture("baseline")))
+	out, err := c.Collect(context.Background(), testutil.Env(t, testutil.Fixture(t, "baseline")))
 	if err != nil {
 		t.Fatal(err)
 	}

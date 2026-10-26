@@ -32,7 +32,7 @@ func collect(t *testing.T, c *Collector, dir string) ([]File, []string, bool, ma
 }
 
 func TestCompromisedFixture(t *testing.T) {
-	fs, warns, partial, caps := collect(t, New(), testutil.Fixture("compromised"))
+	fs, warns, partial, caps := collect(t, New(), testutil.Fixture(t, "compromised"))
 	if partial || len(warns) != 0 {
 		t.Fatalf("partial=%v warnings=%v", partial, warns)
 	}
@@ -47,7 +47,7 @@ func TestCompromisedFixture(t *testing.T) {
 		}
 	}
 	k := by["/tmp/.cache/kworkerd"]
-	data, _ := os.ReadFile(filepath.Join(testutil.Fixture("compromised"), "tmp", ".cache", "kworkerd"))
+	data, _ := os.ReadFile(filepath.Join(testutil.Fixture(t, "compromised"), "tmp", ".cache", "kworkerd"))
 	sum := sha256.Sum256(data)
 	if k.SHA256 != hex.EncodeToString(sum[:]) || !k.Executable || k.Type != "file" || k.Size != int64(len(data)) {
 		t.Fatalf("kworkerd: %+v", k)
@@ -119,7 +119,7 @@ func TestDeterministicAcrossWorkers(t *testing.T) {
 		if err := c.Configure(json.RawMessage(`{"workers":` + string(rune('0'+w)) + `}`)); err != nil {
 			t.Fatal(err)
 		}
-		fs, _, _, _ := collect(t, c, testutil.Fixture("baseline"))
+		fs, _, _, _ := collect(t, c, testutil.Fixture(t, "baseline"))
 		b, _ := json.Marshal(fs)
 		if prev != "" && string(b) != prev {
 			t.Fatalf("output differs with %d workers", w)
@@ -140,7 +140,7 @@ func TestConfigureValidation(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
-	if _, err := New().Collect(ctx, testutil.Env(t, testutil.Fixture("baseline"))); err == nil {
+	if _, err := New().Collect(ctx, testutil.Env(t, testutil.Fixture(t, "baseline"))); err == nil {
 		t.Fatal("cancellation ignored")
 	}
 }
