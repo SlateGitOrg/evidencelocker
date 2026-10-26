@@ -14,7 +14,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/archit2501/evidencelocker/pkg/collector"
+	"github.com/SlateGitOrg/evidencelocker/pkg/collector"
 )
 
 // Socket is one listening/bound socket.

@@ -19,7 +19,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/archit2501/evidencelocker/pkg/collector"
+	"github.com/SlateGitOrg/evidencelocker/pkg/collector"
 )
 
 // File is one hashed directory entry.

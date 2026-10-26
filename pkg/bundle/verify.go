@@ -15,7 +15,7 @@ import (
 
 	"github.com/klauspost/compress/zstd"
 
-	"github.com/archit2501/evidencelocker/pkg/keys"
+	"github.com/SlateGitOrg/evidencelocker/pkg/keys"
 )
 
 // Code classifies a verification finding.

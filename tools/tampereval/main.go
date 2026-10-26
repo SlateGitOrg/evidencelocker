@@ -21,10 +21,10 @@ import (
 
 	"github.com/klauspost/compress/zstd"
 
-	"github.com/archit2501/evidencelocker/pkg/bundle"
-	"github.com/archit2501/evidencelocker/pkg/collector"
-	"github.com/archit2501/evidencelocker/pkg/collectors/builtin"
-	"github.com/archit2501/evidencelocker/pkg/triage"
+	"github.com/SlateGitOrg/evidencelocker/pkg/bundle"
+	"github.com/SlateGitOrg/evidencelocker/pkg/collector"
+	"github.com/SlateGitOrg/evidencelocker/pkg/collectors/builtin"
+	"github.com/SlateGitOrg/evidencelocker/pkg/triage"
 )
 
 func main() {

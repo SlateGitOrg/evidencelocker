@@ -1,4 +1,4 @@
-module github.com/archit2501/evidencelocker
+module github.com/SlateGitOrg/evidencelocker
 
 go 1.27.1
 

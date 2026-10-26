@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/archit2501/evidencelocker/internal/fixtures"
+	"github.com/SlateGitOrg/evidencelocker/internal/fixtures"
 )
 
 func main() {

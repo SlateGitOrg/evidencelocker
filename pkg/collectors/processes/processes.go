@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/archit2501/evidencelocker/pkg/collector"
+	"github.com/SlateGitOrg/evidencelocker/pkg/collector"
 )
 
 // Process is one row of the process table.

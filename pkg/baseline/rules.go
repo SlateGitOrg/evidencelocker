@@ -5,13 +5,13 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/archit2501/evidencelocker/pkg/collector"
-	"github.com/archit2501/evidencelocker/pkg/collectors/accounts"
-	"github.com/archit2501/evidencelocker/pkg/collectors/filehash"
-	"github.com/archit2501/evidencelocker/pkg/collectors/persistence"
-	"github.com/archit2501/evidencelocker/pkg/collectors/processes"
-	"github.com/archit2501/evidencelocker/pkg/collectors/sockets"
-	"github.com/archit2501/evidencelocker/pkg/collectors/users"
+	"github.com/SlateGitOrg/evidencelocker/pkg/collector"
+	"github.com/SlateGitOrg/evidencelocker/pkg/collectors/accounts"
+	"github.com/SlateGitOrg/evidencelocker/pkg/collectors/filehash"
+	"github.com/SlateGitOrg/evidencelocker/pkg/collectors/persistence"
+	"github.com/SlateGitOrg/evidencelocker/pkg/collectors/processes"
+	"github.com/SlateGitOrg/evidencelocker/pkg/collectors/sockets"
+	"github.com/SlateGitOrg/evidencelocker/pkg/collectors/users"
 )
 
 // WritableDirs are world-writable staging areas; executables there are a

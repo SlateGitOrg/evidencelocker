@@ -15,12 +15,12 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/archit2501/evidencelocker/pkg/collector"
-	"github.com/archit2501/evidencelocker/pkg/collectors/builtin"
+	"github.com/SlateGitOrg/evidencelocker/pkg/collector"
+	"github.com/SlateGitOrg/evidencelocker/pkg/collectors/builtin"
 )
 
 // Version is the tool version recorded in manifests (overridable with
-// -ldflags "-X github.com/archit2501/evidencelocker/pkg/cli.Version=...").
+// -ldflags "-X github.com/SlateGitOrg/evidencelocker/pkg/cli.Version=...").
 var Version = "0.1.0"
 
 // Exit codes.

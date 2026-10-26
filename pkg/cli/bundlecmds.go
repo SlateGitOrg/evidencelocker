@@ -10,9 +10,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/archit2501/evidencelocker/pkg/bundle"
-	"github.com/archit2501/evidencelocker/pkg/custody"
-	"github.com/archit2501/evidencelocker/pkg/keys"
+	"github.com/SlateGitOrg/evidencelocker/pkg/bundle"
+	"github.com/SlateGitOrg/evidencelocker/pkg/custody"
+	"github.com/SlateGitOrg/evidencelocker/pkg/keys"
 )
 
 func (a *App) cmdKeygen(_ context.Context, args []string) int {

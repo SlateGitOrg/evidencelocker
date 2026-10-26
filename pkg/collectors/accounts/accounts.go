@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/archit2501/evidencelocker/pkg/collector"
+	"github.com/SlateGitOrg/evidencelocker/pkg/collector"
 )
 
 // PrivilegedGroups are groups whose members can usually become root.

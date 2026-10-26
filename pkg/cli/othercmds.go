@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/archit2501/evidencelocker/pkg/baseline"
-	"github.com/archit2501/evidencelocker/pkg/bundle"
-	"github.com/archit2501/evidencelocker/pkg/custody"
-	"github.com/archit2501/evidencelocker/pkg/keys"
+	"github.com/SlateGitOrg/evidencelocker/pkg/baseline"
+	"github.com/SlateGitOrg/evidencelocker/pkg/bundle"
+	"github.com/SlateGitOrg/evidencelocker/pkg/custody"
+	"github.com/SlateGitOrg/evidencelocker/pkg/keys"
 )
 
 func (a *App) cmdDiff(_ context.Context, args []string) int {

@@ -16,8 +16,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/archit2501/evidencelocker/pkg/bundle"
-	"github.com/archit2501/evidencelocker/pkg/collector"
+	"github.com/SlateGitOrg/evidencelocker/pkg/bundle"
+	"github.com/SlateGitOrg/evidencelocker/pkg/collector"
 )
 
 // Severity ranks findings.

@@ -31,8 +31,8 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/archit2501/evidencelocker/pkg/keys"
-	"github.com/archit2501/evidencelocker/pkg/merkle"
+	"github.com/SlateGitOrg/evidencelocker/pkg/keys"
+	"github.com/SlateGitOrg/evidencelocker/pkg/merkle"
 )
 
 // Format identifiers.

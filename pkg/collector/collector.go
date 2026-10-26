@@ -21,7 +21,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/archit2501/evidencelocker/pkg/fsroot"
+	"github.com/SlateGitOrg/evidencelocker/pkg/fsroot"
 )
 
 // Collector is the plugin interface. Implementations must be safe to call

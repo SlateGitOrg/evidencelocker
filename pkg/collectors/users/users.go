@@ -12,8 +12,8 @@ import (
 	"net/netip"
 	"time"
 
-	"github.com/archit2501/evidencelocker/pkg/collector"
-	"github.com/archit2501/evidencelocker/pkg/fsroot"
+	"github.com/SlateGitOrg/evidencelocker/pkg/collector"
+	"github.com/SlateGitOrg/evidencelocker/pkg/fsroot"
 )
 
 // RecordSize is sizeof(struct utmp) for glibc on 64-bit Linux

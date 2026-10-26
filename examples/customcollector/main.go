@@ -18,10 +18,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/archit2501/evidencelocker/pkg/baseline"
-	"github.com/archit2501/evidencelocker/pkg/cli"
-	"github.com/archit2501/evidencelocker/pkg/collector"
-	"github.com/archit2501/evidencelocker/pkg/collectors/builtin"
+	"github.com/SlateGitOrg/evidencelocker/pkg/baseline"
+	"github.com/SlateGitOrg/evidencelocker/pkg/cli"
+	"github.com/SlateGitOrg/evidencelocker/pkg/collector"
+	"github.com/SlateGitOrg/evidencelocker/pkg/collectors/builtin"
 )
 
 // HostsEntry is one name -> address mapping from /etc/hosts.

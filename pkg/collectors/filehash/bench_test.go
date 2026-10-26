@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/archit2501/evidencelocker/internal/testutil"
+	"github.com/SlateGitOrg/evidencelocker/internal/testutil"
 )
 
 // BenchmarkCollect2000Files hashes a synthetic /usr/bin of 2,000 files of

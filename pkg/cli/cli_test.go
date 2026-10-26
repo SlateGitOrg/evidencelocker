@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/archit2501/evidencelocker/internal/testutil"
-	"github.com/archit2501/evidencelocker/pkg/collector"
-	"github.com/archit2501/evidencelocker/pkg/collectors/builtin"
+	"github.com/SlateGitOrg/evidencelocker/internal/testutil"
+	"github.com/SlateGitOrg/evidencelocker/pkg/collector"
+	"github.com/SlateGitOrg/evidencelocker/pkg/collectors/builtin"
 )
 
 type result struct {

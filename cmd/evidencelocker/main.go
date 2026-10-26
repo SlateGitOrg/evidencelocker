@@ -6,7 +6,7 @@ package main
 import (
 	"os"
 
-	"github.com/archit2501/evidencelocker/pkg/cli"
+	"github.com/SlateGitOrg/evidencelocker/pkg/cli"
 )
 
 func main() { os.Exit(cli.Main(os.Args[1:])) }

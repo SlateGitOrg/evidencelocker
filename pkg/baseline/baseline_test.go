@@ -10,10 +10,10 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/archit2501/evidencelocker/internal/sealtest"
-	"github.com/archit2501/evidencelocker/internal/testutil"
-	"github.com/archit2501/evidencelocker/pkg/bundle"
-	"github.com/archit2501/evidencelocker/pkg/collector"
+	"github.com/SlateGitOrg/evidencelocker/internal/sealtest"
+	"github.com/SlateGitOrg/evidencelocker/internal/testutil"
+	"github.com/SlateGitOrg/evidencelocker/pkg/bundle"
+	"github.com/SlateGitOrg/evidencelocker/pkg/collector"
 )
 
 var (

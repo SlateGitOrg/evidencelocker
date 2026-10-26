@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/archit2501/evidencelocker/pkg/keys"
-	"github.com/archit2501/evidencelocker/pkg/triage"
+	"github.com/SlateGitOrg/evidencelocker/pkg/keys"
+	"github.com/SlateGitOrg/evidencelocker/pkg/triage"
 )
 
 // Config is the optional --config file for collect.

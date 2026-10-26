@@ -13,7 +13,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/archit2501/evidencelocker/pkg/merkle"
+	"github.com/SlateGitOrg/evidencelocker/pkg/merkle"
 )
 
 // ErrNotVerified is wrapped by Open when verification found problems.

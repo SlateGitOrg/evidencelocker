@@ -16,8 +16,8 @@ import (
 	"io/fs"
 	"sort"
 
-	"github.com/archit2501/evidencelocker/pkg/collector"
-	"github.com/archit2501/evidencelocker/pkg/fsroot"
+	"github.com/SlateGitOrg/evidencelocker/pkg/collector"
+	"github.com/SlateGitOrg/evidencelocker/pkg/fsroot"
 )
 
 // Mechanism names.

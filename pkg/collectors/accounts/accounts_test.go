@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/archit2501/evidencelocker/internal/testutil"
-	"github.com/archit2501/evidencelocker/pkg/collector"
+	"github.com/SlateGitOrg/evidencelocker/internal/testutil"
+	"github.com/SlateGitOrg/evidencelocker/pkg/collector"
 )
 
 func TestCompromisedFixture(t *testing.T) {

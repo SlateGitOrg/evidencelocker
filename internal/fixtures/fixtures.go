@@ -17,7 +17,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/archit2501/evidencelocker/pkg/collectors/users"
+	"github.com/SlateGitOrg/evidencelocker/pkg/collectors/users"
 )
 
 // Hosts lists the fixture names Build understands.

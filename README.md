@@ -16,8 +16,8 @@ collect ──► seal (tar.zst + Merkle manifest + ed25519) ──► custody l
                         prove one file (inclusion proof) ──► verify-proof
 ```
 
-This is a portfolio project, built and tested against **synthetic fixture
-filesystems**. It has not been used on real incidents. Read
+It is built and tested against **synthetic fixture filesystems** and has not
+been used on real incidents. Read
 [Limitations](#limitations) before relying on it.
 
 ## Who it is for
@@ -57,14 +57,14 @@ flowchart LR
   FS --> C4[persistence]
   FS --> C5[filehash]
   P[third-party plugin] -.->|collector.Collector| R
-  C1 & C2 & C3 & C4 & C5 --> R[collector.Run\nparallel, timeouts,\npanic isolation]
-  R -->|records + captures| T[triage.Run]
-  T --> B[bundle.Seal\ncanonical tar + zstd\nMerkle manifest\nsigned head]
-  T --> L[custody.Create\nseal entry]
-  B --> V[bundle.Verify\nprecise findings]
-  L --> CV[custody.Verify\nchain, signatures,\ncustodian handoff]
-  B --> D[baseline.Compare\nkey/digest diff +\nseverity rules]
-  B --> PR[Prove / VerifyProof]
+  C1 & C2 & C3 & C4 & C5 --> R["collector.Run<br/>parallel, timeouts,<br/>panic isolation"]
+  R -->|records + captures| T["triage.Run"]
+  T --> B["bundle.Seal<br/>canonical tar + zstd<br/>Merkle manifest<br/>signed head"]
+  T --> L["custody.Create<br/>seal entry"]
+  B --> V["bundle.Verify<br/>precise findings"]
+  L --> CV["custody.Verify<br/>chain, signatures,<br/>custodian handoff"]
+  B --> D["baseline.Compare<br/>key/digest diff +<br/>severity rules"]
+  B --> PR["Prove / VerifyProof"]
 ```
 
 | Package | Role |
@@ -87,7 +87,7 @@ limits are in [docs/CUSTODY.md](docs/CUSTODY.md), collectors and the plugin API
 are in [docs/COLLECTORS.md](docs/COLLECTORS.md), and the threat model is in
 [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md).
 
-## Quickstart
+## Quick start
 
 Requires Go 1.27+ (module pinned to `go 1.27.1`). The only dependency is
 `github.com/klauspost/compress` v1.20.1 for zstd.
@@ -185,8 +185,7 @@ content  matches the proven entry
 ```
 
 The excerpt omits some lines, marked `...`, and shortens long hashes to 8
-characters followed by `...`. All other text is verbatim. The full transcript
-is in the build report.
+characters followed by `...`. All other text is verbatim. 
 
 ## Design decisions (short version)
 
@@ -311,6 +310,23 @@ counts 3,403 lines of tests.
 - Streaming seal for large captures (two-pass hashing instead of in-memory items)
 - Hardware-backed signing (PKCS#11 / Secure Enclave)
 
-## Project files
+## Testing
 
-[DECISIONS.md](DECISIONS.md) · [DATA.md](DATA.md) · [docs/](docs/) · [LICENSE](LICENSE) (MIT)
+`make check` runs gofmt, `go vet`, golangci-lint, race-enabled tests and the 80% coverage gate. `make eval` runs the exhaustive byte-flip tamper sweep and `make bench` the throughput benchmarks.
+
+## Project layout
+
+```
+cmd/evidencelocker/   CLI entry point
+pkg/                  fsroot, collector(s), merkle, keys, bundle, custody, baseline, triage, cli
+internal/             test helpers and synthetic fixtures
+testdata/hosts/       baseline and compromised fixture trees
+tools/tampereval/     exhaustive tamper evaluation
+docs/                 architecture, bundle format, custody, collectors, threat model
+```
+
+See also [DECISIONS.md](DECISIONS.md) and [DATA.md](DATA.md).
+
+## License
+
+MIT — see [LICENSE](LICENSE).

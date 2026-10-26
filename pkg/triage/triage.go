@@ -18,11 +18,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/archit2501/evidencelocker/pkg/bundle"
-	"github.com/archit2501/evidencelocker/pkg/collector"
-	"github.com/archit2501/evidencelocker/pkg/collectors/persistence"
-	"github.com/archit2501/evidencelocker/pkg/custody"
-	"github.com/archit2501/evidencelocker/pkg/fsroot"
+	"github.com/SlateGitOrg/evidencelocker/pkg/bundle"
+	"github.com/SlateGitOrg/evidencelocker/pkg/collector"
+	"github.com/SlateGitOrg/evidencelocker/pkg/collectors/persistence"
+	"github.com/SlateGitOrg/evidencelocker/pkg/custody"
+	"github.com/SlateGitOrg/evidencelocker/pkg/fsroot"
 )
 
 // Options configure one collection.

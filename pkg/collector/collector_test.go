@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/archit2501/evidencelocker/pkg/fsroot"
+	"github.com/SlateGitOrg/evidencelocker/pkg/fsroot"
 )
 
 type rec struct{ K, V string }

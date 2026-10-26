@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/archit2501/evidencelocker/internal/testutil"
+	"github.com/SlateGitOrg/evidencelocker/internal/testutil"
 )
 
 func collect(t *testing.T, c *Collector, dir string) ([]File, []string, bool, map[string][]byte) {

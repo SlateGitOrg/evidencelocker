@@ -54,4 +54,4 @@ formatters:
   settings:
     goimports:
       local-prefixes:
-        - github.com/archit2501/evidencelocker
+        - github.com/SlateGitOrg/evidencelocker

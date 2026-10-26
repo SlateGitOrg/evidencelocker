@@ -30,7 +30,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/archit2501/evidencelocker/pkg/keys"
+	"github.com/SlateGitOrg/evidencelocker/pkg/keys"
 )
 
 // Action is what a custody entry records.

@@ -16,7 +16,7 @@ import (
 
 	"github.com/klauspost/compress/zstd"
 
-	"github.com/archit2501/evidencelocker/pkg/keys"
+	"github.com/SlateGitOrg/evidencelocker/pkg/keys"
 )
 
 // EncoderID names the exact compressor configuration. A verifier whose
