@@ -113,13 +113,15 @@ func TestModesLinksAndLimits(t *testing.T) {
 }
 
 func TestDeterministicAcrossWorkers(t *testing.T) {
+	// One materialised tree for every worker count: separate copies differ in mtime.
+	dir := testutil.Fixture(t, "baseline")
 	var prev string
 	for _, w := range []int{1, 3, 8} {
 		c := New()
 		if err := c.Configure(json.RawMessage(`{"workers":` + string(rune('0'+w)) + `}`)); err != nil {
 			t.Fatal(err)
 		}
-		fs, _, _, _ := collect(t, c, testutil.Fixture(t, "baseline"))
+		fs, _, _, _ := collect(t, c, dir)
 		b, _ := json.Marshal(fs)
 		if prev != "" && string(b) != prev {
 			t.Fatalf("output differs with %d workers", w)
