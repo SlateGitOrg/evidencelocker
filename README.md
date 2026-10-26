@@ -264,9 +264,9 @@ Apple M1 Pro (8 cores) while other build jobs were running (load average
 | Inclusion proof + verify, 100k-leaf tree | 2.1 µs |
 
 **Size.** `git ls-files '*.go' | grep -v _test.go | grep -v -E '^(internal/fixtures|tools|examples)/' | xargs wc -l`
-counts 7,160 lines of non-test Go across the libraries, CLI and test helpers,
+counts 7,269 lines of non-test Go across the libraries, CLI and test helpers,
 including comments. `git ls-files '*.go' | grep _test.go | xargs cat | wc -l`
-counts 3,403 lines of tests.
+counts 3,653 lines of tests.
 
 ## Limitations
 
